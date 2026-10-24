@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Compass,
@@ -8,14 +9,19 @@ import {
   Sparkles,
   ArrowRight,
   TrendingUp,
-  Award,
   BookOpen,
   Code,
   ShieldCheck,
   Zap,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react';
-import { StudentProfile, SkillGapAnalysisResult, LearningRoadmap } from '../types';
+
+import {
+  StudentProfile,
+  SkillGapAnalysisResult,
+  LearningRoadmap,
+} from '../types';
+
 import { CAREER_KNOWLEDGE_BASE } from '../data/careerKnowledgeBase';
 import { NavTab } from './Navbar';
 
@@ -29,369 +35,669 @@ interface DashboardViewProps {
   onOpenProfile: () => void;
 }
 
-export const DashboardView: React.FC<DashboardViewProps> = ({
+const DashboardView: React.FC<DashboardViewProps> = ({
   profile,
   gapAnalysis,
   roadmap,
   onNavigate,
   onSelectRole,
   onToggleTaskComplete,
-  onOpenProfile
+  onOpenProfile,
 }) => {
-  const currentRole = CAREER_KNOWLEDGE_BASE.find(c => c.id === gapAnalysis.roleId) || CAREER_KNOWLEDGE_BASE[0];
+  const currentRole =
+    CAREER_KNOWLEDGE_BASE.find(
+      (career) => career.id === gapAnalysis.roleId
+    ) || CAREER_KNOWLEDGE_BASE[0];
 
-  // Calculate overall task completion
-  const totalTasks = roadmap.weeks.reduce((acc, w) => acc + w.tasks.length, 0);
-  const completedTasks = roadmap.weeks.reduce((acc, w) => acc + w.tasks.filter(t => t.completed).length, 0);
-  const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const totalTasks = roadmap.weeks.reduce(
+    (total, week) => total + week.tasks.length,
+    0
+  );
+
+  const completedTasks = roadmap.weeks.reduce(
+    (total, week) =>
+      total + week.tasks.filter((task) => task.completed).length,
+    0
+  );
+
+  const completionPercentage =
+    totalTasks > 0
+      ? Math.round((completedTasks / totalTasks) * 100)
+      : 0;
+
+  const firstWeek = roadmap.weeks[0];
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in duration-300">
-      {/* Top Welcome & Agent Status Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-slate-800">
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              <span>AI Career Navigator • Active Student Session</span>
+    <div className="mx-auto w-full max-w-7xl space-y-6 pb-10">
+
+      {/* Welcome Banner */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#142D4E] via-[#173D5B] to-[#0F766E] p-6 text-white shadow-lg sm:p-8">
+        <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/5 blur-2xl" />
+
+        <div className="relative">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-teal-100">
+            <Sparkles size={14} />
+            AI CAREER NAVIGATOR
+          </div>
+
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-2xl">
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                Welcome back, {profile.name}!
+              </h1>
+
+              <p className="mt-3 text-sm leading-7 text-slate-200 sm:text-base">
+                Keep building your skills, track your progress, and take
+                the next step toward your career goals.
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-3">
+                <div className="rounded-xl border border-white/15 bg-white/10 px-4 py-3">
+                  <p className="text-xs text-slate-300">Target Role</p>
+                  <p className="mt-1 font-semibold">
+                    {currentRole.title}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-white/15 bg-white/10 px-4 py-3">
+                  <p className="text-xs text-slate-300">Study Time</p>
+                  <p className="mt-1 font-semibold">
+                    {profile.availableStudyHoursPerWeek} hours/week
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-white/15 bg-white/10 px-4 py-3">
+                  <p className="text-xs text-slate-300">Timeline</p>
+                  <p className="mt-1 font-semibold">
+                    {profile.targetTimelineWeeks} weeks
+                  </p>
+                </div>
+              </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Welcome back, {profile.name}!
-            </h1>
-            <p className="text-sm text-slate-300 leading-relaxed">
-              Targeting <strong className="text-white font-semibold">{currentRole.title}</strong> with{' '}
-              <span className="text-indigo-300 font-medium">{profile.availableStudyHoursPerWeek} study hours/week</span> across a{' '}
-              <span className="text-indigo-300 font-medium">{profile.targetTimelineWeeks}-week roadmap</span>.
+
+            <div className="flex shrink-0 flex-col gap-3 sm:flex-row lg:flex-col">
+              <button
+                onClick={() => onNavigate('chat')}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#142D4E] transition hover:bg-teal-50"
+              >
+                <Sparkles size={17} />
+                AI Career Coach
+                <ArrowRight size={16} />
+              </button>
+
+              <button
+                onClick={() => onNavigate('skill-gap')}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/20"
+              >
+                <Target size={17} />
+                Skill-Gap Analysis
+              </button>
+
+              <button
+                onClick={onOpenProfile}
+                className="rounded-xl px-4 py-2 text-sm font-medium text-teal-100 transition hover:bg-white/10"
+              >
+                Edit Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Progress Overview */}
+      <section>
+        <div className="mb-4">
+          <p className="text-xs font-bold uppercase tracking-widest text-teal-700">
+            YOUR OVERVIEW
+          </p>
+          <h2 className="mt-1 text-2xl font-bold text-[#142D4E]">
+            Career Progress
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-500">
+                Role Readiness
+              </p>
+              <div className="rounded-xl bg-teal-50 p-3 text-teal-700">
+                <Target size={21} />
+              </div>
+            </div>
+            <p className="mt-3 text-3xl font-bold text-[#142D4E]">
+              {gapAnalysis.matchScore}%
+            </p>
+            <p className="mt-2 text-xs text-slate-500">
+              Current profile match
+            </p>
+            <div className="mt-4 h-1.5 rounded-full bg-slate-100">
+              <div
+                className="h-1.5 rounded-full bg-teal-600"
+                style={{
+                  width: `${Math.min(100, Math.max(0, gapAnalysis.matchScore))}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-500">
+                Demonstrated Skills
+              </p>
+              <div className="rounded-xl bg-emerald-50 p-3 text-emerald-700">
+                <ShieldCheck size={21} />
+              </div>
+            </div>
+            <p className="mt-3 text-3xl font-bold text-[#142D4E]">
+              {gapAnalysis.demonstratedCount}
+            </p>
+            <p className="mt-2 text-xs text-slate-500">
+              Of {gapAnalysis.evaluatedSkills.length} evaluated skills
+            </p>
+            <div className="mt-4 h-1.5 rounded-full bg-slate-100">
+              <div
+                className="h-1.5 rounded-full bg-emerald-600"
+                style={{
+                  width: `${
+                    gapAnalysis.evaluatedSkills.length > 0
+                      ? Math.min(
+                          100,
+                          (gapAnalysis.demonstratedCount /
+                            gapAnalysis.evaluatedSkills.length) *
+                            100
+                        )
+                      : 0
+                  }%`,
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-500">
+                Weekly Study Budget
+              </p>
+              <div className="rounded-xl bg-sky-50 p-3 text-sky-700">
+                <Clock size={21} />
+              </div>
+            </div>
+            <p className="mt-3 text-3xl font-bold text-[#142D4E]">
+              {profile.availableStudyHoursPerWeek}h
+            </p>
+            <p className="mt-2 text-xs text-slate-500">
+              Hours available per week
+            </p>
+            <p className="mt-4 text-xs font-medium text-sky-700">
+              {roadmap.totalAvailableHours} total planned hours
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              onClick={() => onNavigate('chat')}
-              className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all flex items-center space-x-1.5"
-            >
-              <Compass className="w-4 h-4" />
-              <span>Ask Career Advisor</span>
-            </button>
-            <button
-              onClick={() => onNavigate('skill-gap')}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-all flex items-center space-x-1.5"
-            >
-              <Target className="w-4 h-4 text-indigo-400" />
-              <span>Analyze Skill Gaps</span>
-            </button>
-            <button
-              onClick={onOpenProfile}
-              className="px-3.5 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs font-medium transition-all"
-            >
-              Edit Profile
-            </button>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-500">
+                Roadmap Progress
+              </p>
+              <div className="rounded-xl bg-amber-50 p-3 text-amber-700">
+                <TrendingUp size={21} />
+              </div>
+            </div>
+            <p className="mt-3 text-3xl font-bold text-[#142D4E]">
+              {completionPercentage}%
+            </p>
+            <p className="mt-2 text-xs text-slate-500">
+              {completedTasks} of {totalTasks} tasks completed
+            </p>
+            <div className="mt-4 h-1.5 rounded-full bg-slate-100">
+              <div
+                className="h-1.5 rounded-full bg-amber-500"
+                style={{ width: `${completionPercentage}%` }}
+              />
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* 4 Stat Overview Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Match Score */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs hover:border-slate-300 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Role Readiness Score</span>
-            <span className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
-              <TrendingUp className="w-4 h-4" />
-            </span>
-          </div>
-          <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-3xl font-extrabold text-slate-900">{gapAnalysis.matchScore}%</span>
-            <span className="text-xs text-slate-500">benchmark match</span>
-          </div>
-          <div className="mt-2 w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-            <div
-              className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
-              style={{ width: `${gapAnalysis.matchScore}%` }}
-            />
-          </div>
         </div>
 
-        {/* Demonstrated Skills */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs hover:border-slate-300 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Demonstrated Skills</span>
-            <span className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
-              <CheckCircle2 className="w-4 h-4" />
-            </span>
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+            <div className="rounded-lg bg-amber-50 p-2 text-amber-700">
+              <Zap size={18} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">
+                Partially Developed Skills
+              </p>
+              <p className="font-bold text-[#142D4E]">
+                {gapAnalysis.partiallyDevelopedCount}
+              </p>
+            </div>
           </div>
-          <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-3xl font-extrabold text-slate-900">{gapAnalysis.demonstratedCount}</span>
-            <span className="text-xs text-slate-500">of {gapAnalysis.evaluatedSkills.length} required</span>
-          </div>
-          <p className="mt-2 text-[11px] text-slate-500">
-            {gapAnalysis.partiallyDevelopedCount} partially developed • {gapAnalysis.notYetReportedCount} not reported
-          </p>
-        </div>
 
-        {/* Weekly Study Hours */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs hover:border-slate-300 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Study Budget</span>
-            <span className="p-2 rounded-lg bg-amber-50 text-amber-600">
-              <Clock className="w-4 h-4" />
-            </span>
-          </div>
-          <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-3xl font-extrabold text-slate-900">{profile.availableStudyHoursPerWeek}h</span>
-            <span className="text-xs text-slate-500">/ week</span>
-          </div>
-          <p className="mt-2 text-[11px] text-slate-500">
-            {roadmap.totalAvailableHours} total hours across {roadmap.totalWeeks} weeks
-          </p>
-        </div>
-
-        {/* Roadmap Progress */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs hover:border-slate-300 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Roadmap Progress</span>
-            <span className="p-2 rounded-lg bg-cyan-50 text-cyan-600">
-              <CalendarCheck className="w-4 h-4" />
-            </span>
-          </div>
-          <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-3xl font-extrabold text-slate-900">{completionPercentage}%</span>
-            <span className="text-xs text-slate-500">{completedTasks}/{totalTasks} tasks</span>
-          </div>
-          <div className="mt-2 w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-            <div
-              className="bg-cyan-500 h-2 rounded-full transition-all duration-500"
-              style={{ width: `${completionPercentage}%` }}
-            />
+          <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+            <div className="rounded-lg bg-slate-100 p-2 text-slate-600">
+              <Compass size={18} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">
+                Skills Not Yet Reported
+              </p>
+              <p className="font-bold text-[#142D4E]">
+                {gapAnalysis.notYetReportedCount}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Main 2-Column Split: Active Target Role & Skill Gap Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Target Role & Skill Gap Highlights */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Target Role Card */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+      {/* Main Content */}
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
+
+        <div className="space-y-6 xl:col-span-2">
+
+          {/* Target Role */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <span className="text-[11px] font-semibold text-indigo-600 uppercase tracking-wider">{currentRole.category}</span>
-                <h2 className="text-xl font-bold text-slate-900">{currentRole.title}</h2>
+                <div className="flex items-center gap-2 text-teal-700">
+                  <Target size={20} />
+                  <span className="text-xs font-bold uppercase tracking-wider">
+                    Career Direction
+                  </span>
+                </div>
+                <h2 className="mt-2 text-xl font-bold text-[#142D4E]">
+                  Your Target Role
+                </h2>
               </div>
-              <div className="flex items-center space-x-2">
-                <select
-                  value={currentRole.id}
-                  onChange={(e) => onSelectRole(e.target.value)}
-                  className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  {CAREER_KNOWLEDGE_BASE.map(c => (
-                    <option key={c.id} value={c.id}>{c.title}</option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => onNavigate('careers')}
-                  className="p-1.5 text-slate-500 hover:text-indigo-600"
-                  title="View full career details"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+
+              <button
+                onClick={() => onNavigate('careers')}
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-teal-700 transition hover:bg-teal-50"
+              >
+                Explore Careers
+                <ArrowRight size={16} />
+              </button>
+            </div>
+
+            <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <label
+                htmlFor="target-role"
+                className="mb-2 block text-sm font-semibold text-slate-700"
+              >
+                Select a career path
+              </label>
+
+              <select
+                id="target-role"
+                value={currentRole.id}
+                onChange={(event) => onSelectRole(event.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-[#142D4E] outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              >
+                {CAREER_KNOWLEDGE_BASE.map((career) => (
+                  <option key={career.id} value={career.id}>
+                    {career.title}
+                  </option>
+                ))}
+              </select>
+
+              <span className="mt-4 inline-block rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-800">
+                {currentRole.category}
+              </span>
+
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                {currentRole.fullOverview}
+              </p>
+            </div>
+          </section>
+
+          {/* Priority Learning Areas */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-amber-50 p-3 text-amber-700">
+                <TrendingUp size={21} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-[#142D4E]">
+                  Priority Learning Areas
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Focus on the skills that need the most attention.
+                </p>
               </div>
             </div>
 
-            <p className="text-xs text-slate-600 mt-4 leading-relaxed">
-              {currentRole.fullOverview}
-            </p>
-
-            {/* Priority Skill Areas */}
-            <div className="mt-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5 text-amber-500" />
-                  Priority Learning Areas (Gaps to Bridge First)
-                </h3>
-                <button
-                  onClick={() => onNavigate('skill-gap')}
-                  className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold"
-                >
-                  View full breakdown →
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {gapAnalysis.priorityLearningAreas.slice(0, 4).map((skill) => (
+            <div className="mt-5 space-y-3">
+              {gapAnalysis.priorityLearningAreas
+                .slice(0, 4)
+                .map((skill) => (
                   <div
-                    key={skill.skillName}
-                    className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-50 transition-colors"
+                    key={skill.name}
+                    className="rounded-xl border border-slate-200 p-4 transition hover:border-teal-200"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-xs text-slate-900">{skill.skillName}</span>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <h3 className="font-semibold text-[#142D4E]">
+                        {skill.name}
+                      </h3>
+
                       <span
-                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${
                           skill.status === 'partially_developed'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-rose-100 text-rose-800'
+                            ? 'bg-amber-50 text-amber-800'
+                            : 'bg-rose-50 text-rose-700'
                         }`}
                       >
                         {skill.statusBadge}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
                       {skill.rationale}
                     </p>
-                    <div className="mt-2 text-[10px] text-slate-600 font-medium bg-white px-2 py-1 rounded border border-slate-200 inline-block">
-                      Req: {skill.roleRequirementProficiency} level
-                    </div>
+
+                    <p className="mt-3 text-xs text-slate-500">
+                      Role requirement:{' '}
+                      <span className="font-semibold text-slate-700">
+                        {skill.roleRequirementProficiency}
+                      </span>
+                    </p>
                   </div>
                 ))}
+
+              {gapAnalysis.priorityLearningAreas.length === 0 && (
+                <p className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800">
+                  No priority learning areas are currently listed.
+                </p>
+              )}
+            </div>
+
+            <button
+              onClick={() => onNavigate('skill-gap')}
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-800 transition hover:bg-teal-100"
+            >
+              View Full Skill Analysis
+              <ArrowRight size={16} />
+            </button>
+          </section>
+
+          {/* Learning Tasks */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-emerald-50 p-3 text-emerald-700">
+                <CalendarCheck size={21} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-[#142D4E]">
+                  Current Week Learning Tasks
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Complete your tasks to track your learning progress.
+                </p>
               </div>
             </div>
-          </div>
 
-          {/* Active Roadmap Checklist (Week 1 / Current Week) */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <div className="flex items-center space-x-2">
-                <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
-                  <CalendarCheck className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">Current Week Learning Tasks</h3>
-                  <p className="text-xs text-slate-500">
-                    Week 1 • {roadmap.weeks[0]?.theme} ({roadmap.weeks[0]?.allocatedHours} hrs)
+            {firstWeek ? (
+              <>
+                <div className="mt-5 rounded-xl bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Week 1 Theme
+                  </p>
+                  <p className="mt-1 font-semibold text-[#142D4E]">
+                    {firstWeek.theme}
+                  </p>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Allocated study time: {firstWeek.allocatedHours} hours
                   </p>
                 </div>
-              </div>
-              <button
-                onClick={() => onNavigate('roadmap')}
-                className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center space-x-1"
-              >
-                <span>Full {roadmap.totalWeeks}-Week Roadmap</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
 
-            {/* Checklist tasks */}
-            <div className="mt-4 space-y-2.5">
-              {roadmap.weeks[0]?.tasks.map((task) => (
-                <div
-                  key={task.id}
-                  onClick={() => onToggleTaskComplete(1, task.id)}
-                  className={`flex items-start space-x-3 p-3 rounded-xl border transition-all cursor-pointer ${
-                    task.completed
-                      ? 'bg-emerald-50/50 border-emerald-200 text-slate-500'
-                      : 'bg-white border-slate-200 hover:border-indigo-300 text-slate-800'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={task.completed}
-                    onChange={() => {}} // Handled by parent div
-                    className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-xs font-semibold ${task.completed ? 'line-through text-slate-400' : 'text-slate-900'}`}>
-                      {task.title}
-                    </p>
-                    {task.resourceHint && (
-                      <p className="text-[11px] text-slate-500 mt-0.5">Resource: {task.resourceHint}</p>
-                    )}
-                  </div>
-                  <span className="text-[11px] font-medium text-slate-400 shrink-0">
-                    {task.estimatedHours}h
-                  </span>
+                <div className="mt-4 space-y-3">
+                  {firstWeek.tasks.map((task) => (
+                    <div
+                      key={task.id}
+                      role="button"
+                      tabIndex={0}
+                      aria-pressed={task.completed}
+                      onClick={() =>
+                        onToggleTaskComplete(1, task.id)
+                      }
+                      onKeyDown={(event) => {
+                        if (
+                          event.key === 'Enter' ||
+                          event.key === ' '
+                        ) {
+                          event.preventDefault();
+                          onToggleTaskComplete(1, task.id);
+                        }
+                      }}
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition focus:outline-none focus:ring-2 focus:ring-teal-600 ${
+                        task.completed
+                          ? 'border-emerald-200 bg-emerald-50'
+                          : 'border-slate-200 hover:border-teal-300 hover:bg-teal-50/30'
+                      }`}
+                    >
+                      <div
+                        className={`mt-0.5 shrink-0 rounded-full ${
+                          task.completed
+                            ? 'text-emerald-600'
+                            : 'text-slate-300'
+                        }`}
+                      >
+                        <CheckCircle2 size={23} />
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <h3
+                            className={`font-semibold ${
+                              task.completed
+                                ? 'text-emerald-800 line-through'
+                                : 'text-[#142D4E]'
+                            }`}
+                          >
+                            {task.title}
+                          </h3>
+
+                          <span className="flex w-fit shrink-0 items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs text-slate-600">
+                            <Clock size={12} />
+                            {task.estimatedHours}h
+                          </span>
+                        </div>
+
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                          {task.resourceHint}
+                        </p>
+
+                        {task.checkpoint && (
+                          <p className="mt-3 text-xs leading-5 text-teal-800">
+                            <span className="font-semibold">
+                              Checkpoint:{' '}
+                            </span>
+                            {task.checkpoint}
+                          </p>
+                        )}
+
+                        <p className="mt-3 text-xs text-slate-400">
+                          {task.completed
+                            ? 'Completed — click to undo'
+                            : 'Click to mark as completed'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            ) : (
+              <p className="mt-5 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+                No learning tasks are available yet.
+              </p>
+            )}
 
-            <div className="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center justify-between">
-              <span className="font-medium text-slate-700">{roadmap.weeks[0]?.checkpoint}</span>
-            </div>
-          </div>
+            <button
+              onClick={() => onNavigate('roadmap')}
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#142D4E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#1D4268]"
+            >
+              Open Full Learning Roadmap
+              <ArrowRight size={16} />
+            </button>
+          </section>
         </div>
 
-        {/* Right Column: Suggested Projects & Verified Resources */}
-        <div className="space-y-6">
-          {/* Recommended Capstone Project */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
-            <div className="flex items-center space-x-2 text-slate-900 font-bold text-xs uppercase tracking-wider mb-3">
-              <Code className="w-4 h-4 text-indigo-600" />
-              <span>Recommended Portfolio Project</span>
+        {/* Sidebar */}
+        <aside className="space-y-6">
+
+          {/* Portfolio Project */}
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="bg-gradient-to-br from-[#142D4E] to-[#0F766E] p-5 text-white">
+              <div className="flex items-center gap-2 text-teal-100">
+                <Code size={20} />
+                <span className="text-xs font-bold uppercase tracking-wider">
+                  Build Your Portfolio
+                </span>
+              </div>
+
+              <h2 className="mt-3 text-xl font-bold">
+                Recommended Project
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-200">
+                Turn your learning into practical experience.
+              </p>
             </div>
-            {currentRole.projects[0] && (
-              <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-50/60 to-slate-50 border border-indigo-100 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-900">{currentRole.projects[0].title}</span>
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">
-                    {currentRole.projects[0].difficulty}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+
+            {currentRole.projects[0] ? (
+              <div className="p-5">
+                <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-800">
+                  {currentRole.projects[0].difficulty}
+                </span>
+
+                <h3 className="mt-4 text-lg font-bold text-[#142D4E]">
+                  {currentRole.projects[0].title}
+                </h3>
+
+                <p className="mt-2 text-sm leading-6 text-slate-600">
                   {currentRole.projects[0].summary}
                 </p>
-                <div className="space-y-1">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">Key Deliverables:</span>
-                  <ul className="text-[11px] text-slate-600 list-disc list-inside space-y-0.5">
-                    {currentRole.projects[0].deliverables.slice(0, 2).map((d, i) => (
-                      <li key={i}>{d}</li>
+
+                <p className="mt-5 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Suggested Deliverables
+                </p>
+
+                <ul className="mt-3 space-y-3">
+                  {currentRole.projects[0].deliverables
+                    .slice(0, 2)
+                    .map((deliverable, index) => (
+                      <li
+                        key={`${index}-${deliverable}`}
+                        className="flex items-start gap-2 text-sm leading-6 text-slate-600"
+                      >
+                        <CheckCircle2
+                          size={16}
+                          className="mt-1 shrink-0 text-teal-600"
+                        />
+                        {deliverable}
+                      </li>
                     ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-          </div>
+                </ul>
 
-          {/* Verified Official Resources */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2 text-slate-900 font-bold text-xs uppercase tracking-wider">
-                <BookOpen className="w-4 h-4 text-emerald-600" />
-                <span>Verified Resources</span>
-              </div>
-              <button
-                onClick={() => onNavigate('resources')}
-                className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold"
-              >
-                All →
-              </button>
-            </div>
-
-            <div className="space-y-2.5">
-              {currentRole.officialResources.slice(0, 3).map((res) => (
-                <a
-                  key={res.id}
-                  href={res.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block p-3 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-slate-50 transition-all group"
+                <button
+                  onClick={() => onNavigate('careers')}
+                  className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-teal-200 px-4 py-3 text-sm font-semibold text-teal-800 transition hover:bg-teal-50"
                 >
-                  <div className="flex items-start justify-between">
-                    <span className="text-xs font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
-                      {res.title}
-                    </span>
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600 shrink-0 ml-1 mt-0.5" />
-                  </div>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <span className="text-[10px] font-medium text-slate-500">{res.provider}</span>
-                    <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-medium">
-                      {res.isFree ? 'Free' : 'Official'}
-                    </span>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
+                  Explore Career Projects
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            ) : (
+              <p className="p-5 text-sm text-slate-500">
+                No project recommendations are available for this role.
+              </p>
+            )}
+          </section>
 
-          {/* Educational Guidance Notice */}
-          <div className="p-4 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 text-[11px] leading-relaxed flex items-start space-x-2">
-            <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-            <div>
-              <strong className="text-slate-800 font-semibold">Educational Guidance Notice:</strong>{' '}
-              {gapAnalysis.guidanceDisclaimer}
+          {/* Verified Resources */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-sky-50 p-3 text-sky-700">
+                <BookOpen size={20} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-[#142D4E]">
+                  Verified Resources
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Explore recommended learning materials.
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
+
+            <div className="mt-5 space-y-3">
+              {currentRole.officialResources
+                .slice(0, 3)
+                .map((resource) => (
+                  <a
+                    key={resource.url}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block rounded-xl border border-slate-200 p-3.5 transition hover:border-teal-300 hover:bg-teal-50/30"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-sm font-semibold leading-5 text-[#142D4E]">
+                          {resource.title}
+                        </h3>
+                        <p className="mt-1.5 text-xs text-slate-500">
+                          {resource.provider}
+                        </p>
+                      </div>
+                      <ExternalLink
+                        size={15}
+                        className="shrink-0 text-slate-400"
+                      />
+                    </div>
+
+                    <span
+                      className={`mt-3 inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        resource.isFree
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      {resource.isFree ? 'Free Resource' : 'Official Resource'}
+                    </span>
+                  </a>
+                ))}
+            </div>
+
+            <button
+              onClick={() => onNavigate('resources')}
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm font-semibold text-[#142D4E] transition hover:bg-teal-50"
+            >
+              Browse All Resources
+              <ArrowRight size={16} />
+            </button>
+          </section>
+
+          {/* Guidance Notice */}
+          <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-white p-2.5 text-teal-700 shadow-sm">
+                <ShieldCheck size={20} />
+              </div>
+              <h2 className="font-bold text-[#142D4E]">
+                Educational Guidance
+              </h2>
+            </div>
+
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              {gapAnalysis.guidanceDisclaimer}
+            </p>
+          </section>
+
+        </aside>
       </div>
     </div>
   );
 };
+
+export default DashboardView;
