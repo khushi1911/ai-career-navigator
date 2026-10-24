@@ -4,17 +4,21 @@ import {
   CheckCircle2,
   AlertTriangle,
   HelpCircle,
-  Sparkles,
   ArrowRight,
   ShieldAlert,
-  BookOpen,
   Code,
-  Zap,
   Info,
   ExternalLink,
-  RefreshCw
+  RefreshCw,
+  BookOpen,
+  Sparkles,
 } from 'lucide-react';
-import { StudentProfile, SkillGapAnalysisResult, EvaluatedSkill } from '../types';
+
+import {
+  StudentProfile,
+  SkillGapAnalysisResult,
+} from '../types';
+
 import { CAREER_KNOWLEDGE_BASE } from '../data/careerKnowledgeBase';
 import { analyzeSkillGap } from '../services/skillGapEngine';
 
@@ -31,304 +35,589 @@ export const SkillGapView: React.FC<SkillGapViewProps> = ({
   activeRoleId,
   onSelectRole,
   onGenerateRoadmap,
-  onOpenProfile
+  onOpenProfile,
 }) => {
-  const [filterCategory, setFilterCategory] = useState<'all' | 'demonstrated' | 'partially_developed' | 'not_yet_reported'>('all');
+  const [filterCategory, setFilterCategory] = useState<
+    'all' | 'demonstrated' | 'partially_developed' | 'not_yet_reported'
+  >('all');
 
-  // Compute deterministic skill gap results
-  const result: SkillGapAnalysisResult = analyzeSkillGap(activeRoleId, profile);
-  const currentRole = CAREER_KNOWLEDGE_BASE.find(c => c.id === activeRoleId) || CAREER_KNOWLEDGE_BASE[0];
+  const result: SkillGapAnalysisResult = analyzeSkillGap(
+    activeRoleId,
+    profile
+  );
 
-  const filteredSkills = result.evaluatedSkills.filter(s => {
+  const currentRole =
+    CAREER_KNOWLEDGE_BASE.find((career) => career.id === activeRoleId) ||
+    CAREER_KNOWLEDGE_BASE[0];
+
+  const filteredSkills = result.evaluatedSkills.filter((skill) => {
     if (filterCategory === 'all') return true;
-    return s.status === filterCategory;
+    return skill.status === filterCategory;
   });
 
+  const filters = [
+    {
+      id: 'all' as const,
+      label: `All Skills (${result.evaluatedSkills.length})`,
+    },
+    {
+      id: 'demonstrated' as const,
+      label: `Demonstrated (${result.demonstratedCount})`,
+    },
+    {
+      id: 'partially_developed' as const,
+      label: `Partially Developed (${result.partiallyDevelopedCount})`,
+    },
+    {
+      id: 'not_yet_reported' as const,
+      label: `Not Yet Reported (${result.notYetReportedCount})`,
+    },
+  ];
+
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in duration-200">
-      {/* Header and Role Switcher Banner */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold mb-2">
-            <Target className="w-3.5 h-3.5" />
-            <span>Deterministic Skill-Gap Engine</span>
+    <div className="mx-auto w-full max-w-7xl space-y-6 pb-12">
+
+      {/* Header */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#142D4E] via-[#173D5B] to-[#0F766E] p-6 text-white shadow-lg sm:p-8">
+        <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/5 blur-2xl" />
+
+        <div className="relative">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-teal-100">
+            <Target size={15} />
+            DETERMINISTIC SKILL-GAP ENGINE
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
-            Skill-Gap Analysis for <span className="text-indigo-600">{currentRole.title}</span>
-          </h1>
-          <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-            Comparing your reported profile skills against documented entry-level benchmarks from the Career Knowledge Base.
+
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                Skill-Gap Analysis
+              </h1>
+
+              <p className="mt-2 text-lg font-semibold text-teal-200">
+                {currentRole.title}
+              </p>
+
+              <p className="mt-3 text-sm leading-7 text-slate-200">
+                Compare your reported skills against documented entry-level
+                benchmarks. Identify your strengths and discover which skills
+                need more attention.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <select
+                aria-label="Select target career"
+                value={activeRoleId}
+                onChange={(event) => onSelectRole(event.target.value)}
+                className="min-w-0 rounded-xl border border-white/20 bg-white px-4 py-3 text-sm font-semibold text-[#142D4E] outline-none focus:ring-2 focus:ring-teal-300 sm:min-w-52"
+              >
+                {CAREER_KNOWLEDGE_BASE.map((career) => (
+                  <option key={career.id} value={career.id}>
+                    {career.title}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                onClick={() => onGenerateRoadmap(activeRoleId)}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#142D4E] transition hover:bg-teal-50"
+              >
+                Generate Roadmap
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Summary Cards */}
+      <section>
+        <div className="mb-4">
+          <p className="text-xs font-bold uppercase tracking-widest text-teal-700">
+            ANALYSIS OVERVIEW
+          </p>
+          <h2 className="mt-1 text-xl font-bold text-[#142D4E] sm:text-2xl">
+            Your skill readiness
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Select a status card to filter the skills below.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <select
-            value={activeRoleId}
-            onChange={(e) => onSelectRole(e.target.value)}
-            className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
-          >
-            {CAREER_KNOWLEDGE_BASE.map(career => (
-              <option key={career.id} value={career.id}>
-                {career.title}
-              </option>
-            ))}
-          </select>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+          {/* Benchmark Alignment */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-medium text-slate-500">
+                Benchmark Alignment
+              </p>
+              <div className="rounded-xl bg-teal-50 p-3 text-teal-700">
+                <Target size={21} />
+              </div>
+            </div>
+
+            <p className="mt-3 text-3xl font-bold text-[#142D4E]">
+              {result.matchScore}%
+            </p>
+
+            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
+              <div
+                className="h-full rounded-full bg-teal-600 transition-all"
+                style={{
+                  width: `${Math.min(100, Math.max(0, result.matchScore))}%`,
+                }}
+              />
+            </div>
+
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Weighted alignment with critical core skills.
+            </p>
+          </div>
+
+          {/* Demonstrated */}
           <button
-            onClick={() => onGenerateRoadmap(activeRoleId)}
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs flex items-center space-x-1.5 transition-colors"
+            type="button"
+            onClick={() =>
+              setFilterCategory(
+                filterCategory === 'demonstrated' ? 'all' : 'demonstrated'
+              )
+            }
+            aria-pressed={filterCategory === 'demonstrated'}
+            className={`rounded-2xl border bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+              filterCategory === 'demonstrated'
+                ? 'border-emerald-400 ring-2 ring-emerald-200'
+                : 'border-slate-200 hover:border-emerald-300'
+            }`}
           >
-            <span>Generate Roadmap</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-emerald-700">
+                Demonstrated
+              </p>
+              <div className="rounded-xl bg-emerald-50 p-3 text-emerald-700">
+                <CheckCircle2 size={21} />
+              </div>
+            </div>
+
+            <p className="mt-3 text-3xl font-bold text-emerald-800">
+              {result.demonstratedCount}
+            </p>
+
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Meets or exceeds the entry-level benchmark.
+            </p>
+
+            <p className="mt-3 text-xs font-semibold text-emerald-700">
+              {filterCategory === 'demonstrated'
+                ? 'Filter selected'
+                : 'View demonstrated skills →'}
+            </p>
+          </button>
+
+          {/* Partially Developed */}
+          <button
+            type="button"
+            onClick={() =>
+              setFilterCategory(
+                filterCategory === 'partially_developed'
+                  ? 'all'
+                  : 'partially_developed'
+              )
+            }
+            aria-pressed={filterCategory === 'partially_developed'}
+            className={`rounded-2xl border bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+              filterCategory === 'partially_developed'
+                ? 'border-amber-400 ring-2 ring-amber-200'
+                : 'border-slate-200 hover:border-amber-300'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-amber-700">
+                Partially Developed
+              </p>
+              <div className="rounded-xl bg-amber-50 p-3 text-amber-700">
+                <AlertTriangle size={21} />
+              </div>
+            </div>
+
+            <p className="mt-3 text-3xl font-bold text-amber-800">
+              {result.partiallyDevelopedCount}
+            </p>
+
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Reported proficiency is below the required level.
+            </p>
+
+            <p className="mt-3 text-xs font-semibold text-amber-700">
+              {filterCategory === 'partially_developed'
+                ? 'Filter selected'
+                : 'View skills to develop →'}
+            </p>
+          </button>
+
+          {/* Not Yet Reported */}
+          <button
+            type="button"
+            onClick={() =>
+              setFilterCategory(
+                filterCategory === 'not_yet_reported'
+                  ? 'all'
+                  : 'not_yet_reported'
+              )
+            }
+            aria-pressed={filterCategory === 'not_yet_reported'}
+            className={`rounded-2xl border bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+              filterCategory === 'not_yet_reported'
+                ? 'border-slate-400 ring-2 ring-slate-200'
+                : 'border-slate-200 hover:border-slate-400'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-slate-600">
+                Not Yet Reported
+              </p>
+              <div className="rounded-xl bg-slate-100 p-3 text-slate-600">
+                <HelpCircle size={21} />
+              </div>
+            </div>
+
+            <p className="mt-3 text-3xl font-bold text-[#142D4E]">
+              {result.notYetReportedCount}
+            </p>
+
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Proficiency has not been reported in your profile.
+            </p>
+
+            <p className="mt-3 text-xs font-semibold text-slate-600">
+              {filterCategory === 'not_yet_reported'
+                ? 'Filter selected'
+                : 'Review these skills →'}
+            </p>
           </button>
         </div>
-      </div>
+      </section>
 
-      {/* 3 Metric Cards: Demonstrated vs Partial vs Not Yet Reported */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        {/* Match Score */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold text-slate-500">Benchmark Alignment</span>
-          <div className="text-3xl font-extrabold text-slate-900 mt-2">{result.matchScore}%</div>
-          <div className="mt-2 w-full bg-slate-100 rounded-full h-2">
-            <div className="bg-indigo-600 h-2 rounded-full" style={{ width: `${result.matchScore}%` }} />
+      {/* Filters */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="font-bold text-[#142D4E]">Evaluated Skills</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              {filteredSkills.length} of {result.evaluatedSkills.length} skills
+              displayed.
+            </p>
           </div>
-          <p className="text-[11px] text-slate-500 mt-2">Weighted for critical core skills</p>
+
+          <button
+            type="button"
+            onClick={onOpenProfile}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-teal-200 px-4 py-2.5 text-sm font-semibold text-teal-800 transition hover:bg-teal-50"
+          >
+            <RefreshCw size={15} />
+            Update Profile Skills
+          </button>
         </div>
 
-        {/* Demonstrated */}
-        <div
-          onClick={() => setFilterCategory('demonstrated')}
-          className={`bg-white rounded-xl p-5 border cursor-pointer transition-all ${
-            filterCategory === 'demonstrated' ? 'ring-2 ring-emerald-500 border-transparent bg-emerald-50/20' : 'border-slate-200 hover:border-emerald-300'
-          }`}
-        >
-          <div className="flex items-center justify-between text-xs font-semibold text-emerald-700">
-            <span>Demonstrated</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div className="text-3xl font-extrabold text-emerald-900 mt-2">{result.demonstratedCount}</div>
-          <p className="text-[11px] text-slate-500 mt-2">Meets or exceeds entry benchmark</p>
-        </div>
-
-        {/* Partially Developed */}
-        <div
-          onClick={() => setFilterCategory('partially_developed')}
-          className={`bg-white rounded-xl p-5 border cursor-pointer transition-all ${
-            filterCategory === 'partially_developed' ? 'ring-2 ring-amber-500 border-transparent bg-amber-50/20' : 'border-slate-200 hover:border-amber-300'
-          }`}
-        >
-          <div className="flex items-center justify-between text-xs font-semibold text-amber-700">
-            <span>Partially Developed</span>
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
-          </div>
-          <div className="text-3xl font-extrabold text-amber-900 mt-2">{result.partiallyDevelopedCount}</div>
-          <p className="text-[11px] text-slate-500 mt-2">Reported beginner, needs intermediate</p>
-        </div>
-
-        {/* Not Yet Reported */}
-        <div
-          onClick={() => setFilterCategory('not_yet_reported')}
-          className={`bg-white rounded-xl p-5 border cursor-pointer transition-all ${
-            filterCategory === 'not_yet_reported' ? 'ring-2 ring-slate-700 border-transparent bg-slate-100' : 'border-slate-200 hover:border-slate-400'
-          }`}
-        >
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-            <span>Not Yet Reported</span>
-            <HelpCircle className="w-4 h-4 text-slate-500" />
-          </div>
-          <div className="text-3xl font-extrabold text-slate-800 mt-2">{result.notYetReportedCount}</div>
-          <p className="text-[11px] text-slate-500 mt-2">Proficiency unknown in profile</p>
-        </div>
-      </div>
-
-      {/* Filter Tabs & Update Profile CTA */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs font-semibold text-slate-500 mr-2">Filter View:</span>
-          {(['all', 'demonstrated', 'partially_developed', 'not_yet_reported'] as const).map((tab) => (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {filters.map((filter) => (
             <button
-              key={tab}
-              onClick={() => setFilterCategory(tab)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                filterCategory === tab
-                  ? 'bg-slate-900 text-white font-semibold'
-                  : 'text-slate-600 hover:bg-slate-100'
+              key={filter.id}
+              type="button"
+              onClick={() => setFilterCategory(filter.id)}
+              aria-pressed={filterCategory === filter.id}
+              className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                filterCategory === filter.id
+                  ? 'bg-[#142D4E] text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-teal-50 hover:text-teal-800'
               }`}
             >
-              {tab === 'all' && `All Skills (${result.evaluatedSkills.length})`}
-              {tab === 'demonstrated' && `Demonstrated (${result.demonstratedCount})`}
-              {tab === 'partially_developed' && `Partially Developed (${result.partiallyDevelopedCount})`}
-              {tab === 'not_yet_reported' && `Not Yet Reported (${result.notYetReportedCount})`}
+              {filter.label}
             </button>
           ))}
         </div>
+      </section>
 
-        <button
-          onClick={onOpenProfile}
-          className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1 shrink-0"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          <span>Update Your Skills in Profile</span>
-        </button>
-      </div>
+      {/* Skills Grid */}
+      {filteredSkills.length > 0 ? (
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {filteredSkills.map((skill) => {
+            const isDemonstrated = skill.status === 'demonstrated';
+            const isPartial = skill.status === 'partially_developed';
 
-      {/* Evaluated Skills Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredSkills.map((skill) => {
-          const isDemonstrated = skill.status === 'demonstrated';
-          const isPartial = skill.status === 'partially_developed';
-          const isNotReported = skill.status === 'not_yet_reported';
+            const statusStyle = isDemonstrated
+              ? {
+                  card: 'border-emerald-200',
+                  badge: 'bg-emerald-50 text-emerald-800',
+                  icon: 'text-emerald-600',
+                }
+              : isPartial
+                ? {
+                    card: 'border-amber-200',
+                    badge: 'bg-amber-50 text-amber-800',
+                    icon: 'text-amber-600',
+                  }
+                : {
+                    card: 'border-slate-200',
+                    badge: 'bg-slate-100 text-slate-700',
+                    icon: 'text-slate-500',
+                  };
 
-          return (
-            <div
-              key={skill.skillName}
-              className={`p-5 rounded-2xl border transition-all ${
-                isDemonstrated
-                  ? 'bg-white border-emerald-200 shadow-2xs'
-                  : isPartial
-                  ? 'bg-white border-amber-200 shadow-2xs'
-                  : 'bg-white border-slate-200 shadow-2xs'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-bold text-sm text-slate-900">{skill.skillName}</span>
-                    <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                        skill.importance === 'critical'
-                          ? 'bg-rose-100 text-rose-800'
-                          : skill.importance === 'high'
-                          ? 'bg-indigo-100 text-indigo-800'
-                          : 'bg-slate-100 text-slate-700'
-                      }`}
-                    >
-                      {skill.importance}
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">
-                    Category: <strong className="capitalize text-slate-700">{skill.category}</strong>
-                  </div>
-                </div>
+            return (
+              <article
+                key={skill.skillName}
+                className={`rounded-2xl border bg-white p-5 shadow-sm transition hover:shadow-md ${statusStyle.card}`}
+              >
+                {/* Skill Heading */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="text-base font-bold text-[#142D4E]">
+                      {skill.skillName}
+                    </h3>
 
-                <span
-                  className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
-                    isDemonstrated
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : isPartial
-                      ? 'bg-amber-100 text-amber-800'
-                      : 'bg-slate-100 text-slate-600'
-                  }`}
-                >
-                  {skill.statusBadge}
-                </span>
-              </div>
-
-              {/* Rationale & Comparison */}
-              <div className="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700 space-y-1">
-                <div>
-                  <span className="font-semibold text-slate-900">Analysis: </span>
-                  {skill.rationale}
-                </div>
-                <div className="text-[11px] text-slate-500">
-                  Required Level: <span className="font-semibold text-slate-800">{skill.roleRequirementProficiency}</span> • Reported Level:{' '}
-                  <span className="font-semibold text-slate-800">{skill.studentReportedProficiency || 'None reported'}</span>
-                </div>
-              </div>
-
-              {/* Why This Gap Matters (Crucial requirement from prompt) */}
-              <div className="mt-3">
-                <div className="text-[11px] font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center gap-1">
-                  <Info className="w-3.5 h-3.5 text-indigo-500" />
-                  Why this skill matters for entry-level hiring:
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  {skill.impactExplanation}
-                </p>
-              </div>
-
-              {/* Interview Topics / Recommended Topics */}
-              {skill.recommendedTopics.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-slate-100">
-                  <div className="text-[11px] font-semibold text-slate-500 mb-1">Key Technical Screening Topics:</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {skill.recommendedTopics.map((topic, i) => (
-                      <span
-                        key={i}
-                        className="text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono"
-                      >
-                        {topic}
+                    <p className="mt-1 text-xs text-slate-500">
+                      Category:{' '}
+                      <span className="font-semibold capitalize text-slate-700">
+                        {skill.category}
                       </span>
-                    ))}
+                    </p>
+                  </div>
+
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${statusStyle.badge}`}
+                  >
+                    {skill.statusBadge}
+                  </span>
+                </div>
+
+                {/* Importance */}
+                <div className="mt-3">
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                      skill.importance === 'critical'
+                        ? 'bg-rose-50 text-rose-700'
+                        : skill.importance === 'high'
+                          ? 'bg-sky-50 text-sky-800'
+                          : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    {skill.importance} importance
+                  </span>
+                </div>
+
+                {/* Analysis */}
+                <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Skill Analysis
+                  </p>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-700">
+                    {skill.rationale}
+                  </p>
+
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="rounded-lg bg-white p-3">
+                      <p className="text-[11px] text-slate-500">
+                        Required Level
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-[#142D4E]">
+                        {skill.roleRequirementProficiency}
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg bg-white p-3">
+                      <p className="text-[11px] text-slate-500">
+                        Reported Level
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-[#142D4E]">
+                        {skill.studentReportedProficiency || 'None reported'}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              )}
 
-              {/* Linked Verified Resource */}
-              {skill.matchedResources.length > 0 && (
-                <div className="mt-3 pt-2">
-                  <a
-                    href={skill.matchedResources[0].url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center space-x-1.5 text-xs text-indigo-600 hover:text-indigo-800 font-semibold"
-                  >
-                    <span>Recommended Guide: {skill.matchedResources[0].title}</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
+                {/* Hiring Relevance */}
+                <div className="mt-4">
+                  <div className="flex items-center gap-2">
+                    <Info size={15} className="shrink-0 text-teal-700" />
+                    <h4 className="text-xs font-bold text-[#142D4E]">
+                      Why This Skill Matters
+                    </h4>
+                  </div>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {skill.impactExplanation}
+                  </p>
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
 
-      {/* Suggested Projects Section for Target Role */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
-        <div className="flex items-center space-x-2">
-          <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
-            <Code className="w-4 h-4" />
+                {/* Recommended Topics */}
+                {skill.recommendedTopics.length > 0 && (
+                  <div className="mt-4 border-t border-slate-100 pt-4">
+                    <h4 className="text-xs font-semibold text-slate-600">
+                      Technical Screening Topics
+                    </h4>
+
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {skill.recommendedTopics.map((topic, index) => (
+                        <span
+                          key={`${topic}-${index}`}
+                          className="rounded-lg bg-slate-100 px-2.5 py-1.5 font-mono text-[11px] text-slate-700"
+                        >
+                          {topic}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recommended Resource */}
+                {skill.matchedResources.length > 0 && (
+                  <div className="mt-4 border-t border-slate-100 pt-4">
+                    <a
+                      href={skill.matchedResources[0].url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-start gap-2 text-sm font-semibold text-teal-800 transition hover:text-teal-600"
+                    >
+                      <BookOpen size={16} className="mt-0.5 shrink-0" />
+                      <span className="min-w-0 break-words">
+                        Recommended Guide:{' '}
+                        {skill.matchedResources[0].title}
+                      </span>
+                      <ExternalLink
+                        size={14}
+                        className="mt-0.5 shrink-0"
+                      />
+                    </a>
+                  </div>
+                )}
+              </article>
+            );
+          })}
+        </section>
+      ) : (
+        <section className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+            <Sparkles size={25} />
           </div>
+
+          <h3 className="mt-4 text-lg font-bold text-[#142D4E]">
+            No skills match this filter
+          </h3>
+
+          <p className="mt-2 text-sm text-slate-500">
+            Try another filter to see your evaluated skills.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => setFilterCategory('all')}
+            className="mt-5 rounded-xl bg-[#142D4E] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1D4268]"
+          >
+            Show All Skills
+          </button>
+        </section>
+      )}
+
+      {/* Recommended Projects */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex items-start gap-3">
+          <div className="rounded-xl bg-teal-50 p-3 text-teal-700">
+            <Code size={21} />
+          </div>
+
           <div>
-            <h2 className="text-sm font-bold text-slate-900">Recommended Projects to Bridge Gaps</h2>
-            <p className="text-xs text-slate-500">
-              Building these specific deliverables directly answers hiring managers' technical screening requirements.
+            <h2 className="text-xl font-bold text-[#142D4E]">
+              Recommended Projects to Bridge Gaps
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Build practical projects to apply your skills and demonstrate
+              your understanding of the target role.
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {currentRole.projects.map((proj) => (
-            <div
-              key={proj.id}
-              className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2 hover:bg-slate-50 transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-900">{proj.title}</span>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">
-                  {proj.difficulty}
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 leading-relaxed">{proj.summary}</p>
-              <div className="text-[11px] text-slate-500">
-                <strong className="text-slate-700">Key Skills Used:</strong> {proj.keySkills.join(', ')}
-              </div>
-              <div className="text-[11px] text-indigo-700 font-medium">
-                Portfolio Value: {proj.portfolioValue}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+        {currentRole.projects.length > 0 ? (
+          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+            {currentRole.projects.map((project) => (
+              <article
+                key={project.id}
+                className="rounded-xl border border-slate-200 bg-slate-50/70 p-5 transition hover:border-teal-200 hover:bg-teal-50/20"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <h3 className="font-bold text-[#142D4E]">
+                    {project.title}
+                  </h3>
 
-      {/* Educational Notice */}
-      <div className="p-4 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 text-xs flex items-start space-x-2">
-        <ShieldAlert className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-        <div>
-          <strong className="text-slate-800 font-semibold">Educational Disclaimer:</strong>{' '}
-          {result.guidanceDisclaimer}
+                  <span className="w-fit shrink-0 rounded-full bg-teal-50 px-2.5 py-1 text-[10px] font-bold text-teal-800">
+                    {project.difficulty}
+                  </span>
+                </div>
+
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  {project.summary}
+                </p>
+
+                <div className="mt-4">
+                  <p className="text-xs font-bold text-slate-700">
+                    Key Skills Used
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {project.keySkills.map((skill, index) => (
+                      <span
+                        key={`${skill}-${index}`}
+                        className="rounded-lg bg-white px-2.5 py-1.5 text-xs text-slate-600 ring-1 ring-slate-200"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-lg bg-white p-3">
+                  <p className="text-xs font-semibold text-teal-800">
+                    Portfolio Value
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    {project.portfolioValue}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-5 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+            No projects are currently listed for this career.
+          </p>
+        )}
+
+        <button
+          type="button"
+          onClick={() => onGenerateRoadmap(activeRoleId)}
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#142D4E] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1D4268]"
+        >
+          Create My Learning Roadmap
+          <ArrowRight size={16} />
+        </button>
+      </section>
+
+      {/* Educational Disclaimer */}
+      <section className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+        <div className="rounded-lg bg-white p-2 text-slate-600">
+          <ShieldAlert size={18} />
         </div>
-      </div>
+
+        <div>
+          <h2 className="text-sm font-bold text-[#142D4E]">
+            Educational Disclaimer
+          </h2>
+
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {result.guidanceDisclaimer}
+          </p>
+        </div>
+      </section>
     </div>
   );
 };
