@@ -1,99 +1,175 @@
 # AI Career Navigator
 
-An AI-assisted career guidance application for students. It combines a structured career knowledge base, deterministic skill-gap analysis, personalized study roadmaps, a conversational advisor, and a resume review workflow.
+An AI-powered career guidance application that helps students understand their skills, explore career opportunities, identify skill gaps, and build personalized learning roadmaps.
+
+AI Career Navigator combines an interactive career assistant with structured career knowledge to provide practical, goal-oriented guidance based on a student's profile, current skills, target role, and available study time.
 
 ## Features
 
-- Career Explorer covering eight entry-level technology roles.
-- Student profile and three evaluation presets.
-- Skill-gap analysis that distinguishes demonstrated, partially developed, and not-yet-reported skills.
-- Weekly learning roadmaps designed around the student's study-hour budget.
-- Gemini-powered career chat with a knowledge-base fallback.
-- Resume review for pasted text, TXT/CSV, and PDF when Gemini is configured.
-- Resource Finder and progress dashboard.
+### 🤖 AI Career Assistant
 
-## Tech stack
+* Interactive chat for career-related questions and guidance.
+* Context-aware responses based on the student's profile and career goals.
+* Career knowledge retrieval to support more relevant recommendations.
+* Fallback handling for temporary AI service issues.
 
-- React + TypeScript + Vite
-- Node.js + Express + TypeScript (`tsx` for the server start script)
-- Google GenAI SDK (`@google/genai`)
-- Tailwind CSS and Lucide icons
+### 🎯 Personalized Career Guidance
 
-## Run locally
+* Explore career options based on individual interests, skills, and goals.
+* Access career information and role-specific guidance.
+* Work with a predefined knowledge base covering eight career roles.
 
-Requirements: a supported current Node.js LTS release and npm.
+### 📊 Skill Gap Analysis
 
-1. Extract the project and open a terminal in the project root.
-2. Install dependencies:
+* Compare existing skills against the requirements of a target career.
+* Identify demonstrated, partially developed, and unreported skills.
+* Highlight priority learning areas.
+* Review skill-match information to understand where further development may be useful.
 
-   ```bash
-   npm install
-   ```
+### 🗺️ Personalized Learning Roadmap
 
-3. Create a local environment file by copying `.env.example` to `.env`. On Windows PowerShell:
+* Generate a structured learning plan based on career goals.
+* Organize learning activities into weekly milestones.
+* Consider available study hours and target timelines.
+* Track task completion and monitor learning progress.
 
-   ```powershell
-   Copy-Item .env.example .env
-   ```
+### 📄 Resume Analysis
 
-4. Put your own Gemini API key in `.env` if you want model-assisted chat and resume analysis. Do not commit `.env`. Without a key, career chat uses the knowledge-base fallback and text resume analysis uses a basic heuristic reviewer. PDF analysis requires a configured key.
-5. Start the app:
+* Analyze supported resume files, including PDF and text-based input.
+* Use extracted information to support career and skill-related guidance.
 
-   ```bash
-   npm run dev
-   ```
+### 🧪 Evaluation and Testing
 
-6. Open `http://localhost:3000`.
+* Includes predefined test profiles for evaluating different student scenarios.
+* Supports testing career recommendations, skill-gap analysis, and personalized guidance.
 
-## Verification
+## Technology Stack
 
-Run the deterministic logic checks:
+| Layer           | Technologies                 |
+| --------------- | ---------------------------- |
+| Frontend        | React, TypeScript, Vite      |
+| UI Components   | Lucide React                 |
+| Backend         | Node.js, Express, TypeScript |
+| AI Integration  | Google Gemini API            |
+| Build Tool      | Vite                         |
+| Deployment      | Render                       |
+| Version Control | Git and GitHub               |
+
+## Application Architecture
+
+The application uses a frontend-backend architecture.
+
+1. **Frontend:** Provides the user interface for profile management, career exploration, AI conversations, skill-gap analysis, and learning roadmaps.
+2. **Backend:** Handles API requests and coordinates communication with the AI service.
+3. **AI Layer:** Uses the Google Gemini API to support conversational career guidance and related features.
+4. **Career Knowledge Base:** Provides structured career information to support role-specific guidance.
+5. **Fallback Handling:** Helps the application respond more gracefully when the primary AI request encounters an issue.
+
+## Getting Started
+
+### Prerequisites
+
+Install the following before running the project locally:
+
+* Node.js and npm
+* Git
+* A Google Gemini API key
+
+### 1. Clone the Repository
 
 ```bash
-npm run test:logic
+git clone https://github.com/khushi1911/ai-career-navigator.git
 ```
 
-Run the TypeScript check:
+Navigate to the project directory:
 
 ```bash
-npm run lint
+cd ai-career-navigator
 ```
 
-Build the frontend bundle:
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure Environment Variables
+
+Create a `.env` file in the project root directory, following the configuration expected by the backend.
+
+Add your Gemini API key:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+Replace `your_gemini_api_key` with your own API key.
+
+**Security:** Keep your API key private. Do not commit your `.env` file or expose secret keys in frontend code or public repositories.
+
+### 4. Run the Application Locally
+
+Start the development server using:
+
+```bash
+npm run dev
+```
+
+Use the local URL displayed in the terminal to open the application.
+
+### 5. Build the Application
+
+To verify that the application can be built for production, run:
 
 ```bash
 npm run build
 ```
 
-## Deploy to Render
+To start the application using its configured production command:
 
-Create a **Web Service** from the GitHub repository, or use the included `render.yaml` Blueprint. The Blueprint configures the following settings:
-
-- Runtime: Node
-- Build command: `npm install && npm run build`
-- Start command: `npm start`
-- Environment: `NODE_ENV=production`
-- Secret environment variable: `GEMINI_API_KEY` set in Render's dashboard (never in source code)
-
-Render supplies `PORT`; the Express server listens on it. Keep the repository private while preparing the deployment if preferred; Render can deploy private repositories when authorized.
-
-## Privacy and safety notes
-
-- Student profile data is saved in the browser's local storage on that device. It is not a user-account or cloud-sync system.
-- Chat messages are sent to the configured backend. When Gemini is configured, prompts and relevant profile/context data are sent to Google's Gemini API for generation.
-- Resume text or PDF content may be sent to Gemini for analysis. Avoid uploading unnecessary sensitive personal information. The model is instructed to treat resume content as untrusted data, but this is not a guarantee that every embedded instruction will be neutralized.
-- The built-in rate limiter is in-memory and applies per server process. For multiple production instances, replace it with a shared store-backed rate limiter.
-- Career recommendations are educational guidance, not guarantees of employment, admission, or salary.
-
-## Project structure
-
-```text
-server.ts
-src/
-  App.tsx
-  components/
-  data/
-  services/
-  types/
-scripts/verify-logic.ts
+```bash
+npm start
 ```
+
+## Deployment
+
+The application is deployed using Render.
+
+The deployment configuration uses the following settings:
+
+| Setting              | Value                          |
+| -------------------- | ------------------------------ |
+| Build Command        | `npm install && npm run build` |
+| Start Command        | `npm start`                    |
+| Deployment Branch    | `main`                         |
+| Environment Variable | `GEMINI_API_KEY`               |
+
+Add the required environment variables through the Render dashboard rather than committing secrets to the repository.
+
+When automatic deployment is enabled, changes pushed to the configured GitHub branch can trigger a new deployment.
+
+## Project Goals
+
+AI Career Navigator aims to make career planning more structured and accessible by combining AI-powered assistance with practical learning guidance.
+
+The application focuses on helping students:
+
+* Understand their current skills.
+* Explore suitable career paths.
+* Identify areas that need improvement.
+* Organize learning into manageable milestones.
+* Make informed decisions about their career development.
+
+## Future Enhancements
+
+Potential areas for further development include:
+
+* More career paths and detailed skill requirements.
+* Improved resume parsing and skill extraction.
+* Additional learning resources and project recommendations.
+* Enhanced learning progress analytics.
+* More comprehensive testing across different student profiles.
+
+## License
+
+No license is specified here. Add a license to the repository if you intend to distribute the project under specific open-source terms.
