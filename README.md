@@ -1,8 +1,11 @@
 # AI Career Navigator
 
-An AI-powered career guidance application that helps students understand their skills, explore career opportunities, identify skill gaps, and build personalized learning roadmaps.
+**An AI-powered career guidance application that helps students analyze their skills, explore career opportunities, identify skill gaps, and build personalized learning roadmaps.**
 
-AI Career Navigator combines an interactive career assistant with structured career knowledge to provide practical, goal-oriented guidance based on a student's profile, current skills, target role, and available study time.
+🚀 **[Live Demo](https://ai-career-navigator-0ybs.onrender.com)** · 💻 **[GitHub Repository](https://github.com/khushi1911/ai-career-navigator)**
+
+AI Career Navigator combines an interactive AI career assistant with structured career knowledge to provide practical, goal-oriented guidance based on a student's profile, current skills, target role, and available study time.
+
 
 ## Features
 
